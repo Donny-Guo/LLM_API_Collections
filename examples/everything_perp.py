@@ -15,8 +15,9 @@ def get_output(prompt: str) -> tuple:
     url = "https://api.perplexity.ai/chat/completions"
    
     payload = {
-        "model": "llama-3.1-8b-instruct",
+        "model": model_name,
         "messages": [
+            {"role": "system", "content": "You are an expert in crisis management."},
             {
                 "role": "user",
                 "content": [
@@ -32,16 +33,18 @@ def get_output(prompt: str) -> tuple:
         "Content-Type": "application/json"
     }
 
-    response = requests.request("POST", url, json=payload, headers=headers)
-    model_output, input_tokens, output_tokens = None, None, None
-    if response.status_code == 200:
-        message = response.json()
-        model_output = message['choices'][0]['message']['content']
-        usage = message['usage']
-        input_tokens = usage['prompt_tokens']
-        output_tokens = usage['completion_tokens']
-    else:
-        print(f"Request failed with status code: {response.status_code}")
+    while True:
+        response = requests.request("POST", url, json=payload, headers=headers)
+        model_output, input_tokens, output_tokens = None, None, None
+        if response.status_code == 200:
+            message = response.json()
+            model_output = message['choices'][0]['message']['content']
+            usage = message['usage']
+            input_tokens = usage['prompt_tokens']
+            output_tokens = usage['completion_tokens']
+            break
+        # else:
+        #     print(f"Request failed with status code: {response.status_code}")
 
     return (model_output, input_tokens, output_tokens)
 
@@ -57,10 +60,11 @@ def gather_results(output_filename):
 if __name__ == "__main__":
     print("Script starts")
     start_time = time.time()
-
+    model_name = "llama-3.1-8b-instruct"
+    # model_name = "llama-3.1-70b-instruct"
     api_key = os.environ.get("PERPLEXITY_API_KEY")
-    datafile = "dataset/test.json"
-    output_file = "output/perplexity-llama-3.1-8b-result.csv"
+    datafile = "dataset/llama_test.json"
+    output_file = f"output/perplexity-{model_name}-result-with-system-prompt.csv"
     instructions, answers = read_data(datafile)
     model_outputs = []
     total_input_tokens, total_output_tokens = 0, 0
