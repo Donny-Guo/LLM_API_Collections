@@ -1,7 +1,11 @@
 # LLM_API_Collections
 A collection of common LLM API Calls
 
+check usage and billing:
 
+- openai: https://platform.openai.com/usage
+- Perplexity: https://www.perplexity.ai/settings/api
+- Anthropic: https://console.anthropic.com/settings/plans
 
 
 
